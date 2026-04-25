@@ -106,6 +106,7 @@ export function BuildOnRound({
     return (
       <PassDevice
         toName={nameOf(currentPlayer)}
+        toPlayer={currentPlayer}
         subtitle={meta ?? "Build on"}
         onContinue={() => setPhase("input")}
       />
@@ -114,15 +115,15 @@ export function BuildOnRound({
 
   if (phase === "input" || phase === "warning") {
     return (
-      <div className="flex flex-col gap-6 max-w-xl w-full mx-auto">
-        <PromptCard promptText={round.promptText} meta={meta ?? "Build on — alternate, no repeats"} />
+      <div className="flex flex-col gap-6 max-w-4xl w-full mx-auto animate-rise">
+        <PromptCard promptText={round.promptText} meta={meta ?? "Build on — no repeats"} player={currentPlayer} playerName={nameOf(currentPlayer)} />
         {contributions.length > 0 ? (
-          <div className="bg-white rounded-2xl border border-stone-200 px-5 py-4">
-            <p className="text-xs uppercase tracking-widest text-stone-500 mb-2">So far</p>
-            <ol className="space-y-1.5 text-stone-700">
+          <div className="bg-white rounded-3xl border border-stone-200 px-8 py-6">
+            <p className="text-sm uppercase tracking-[0.25em] text-stone-500 mb-4">So far</p>
+            <ol className="space-y-3 text-stone-800 text-xl font-serif">
               {contributions.map((c, i) => (
                 <li key={i}>
-                  <span className="text-stone-500 text-xs mr-2">{c.playerName}:</span>
+                  <span className="text-stone-400 text-sm font-sans uppercase tracking-wider mr-3">{c.playerName}</span>
                   {c.text}
                 </li>
               ))}
@@ -131,14 +132,13 @@ export function BuildOnRound({
         ) : null}
         {warningText ? (
           <div className="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 text-sm text-amber-900">
-            <strong>One warning:</strong> {warningText} Try again.
+            <strong>Close call —</strong> {warningText} One more try.
           </div>
         ) : null}
-        <p className="text-stone-600 text-sm">{nameOf(currentPlayer)}, your turn.</p>
-        <AnswerInput onSubmit={handleSubmit} submitLabel="Add" disabled={submitting} />
+        <AnswerInput onSubmit={handleSubmit} submitLabel="Add" disabled={submitting} player={currentPlayer} />
         <button
           onClick={tapOut}
-          className="self-center text-sm text-stone-500 hover:text-stone-700 underline"
+          className="self-center text-sm text-stone-500 hover:text-stone-700"
         >
           I&apos;m out
         </button>
@@ -148,13 +148,13 @@ export function BuildOnRound({
 
   if (phase === "over" && winner) {
     return (
-      <div className="flex flex-col gap-6 max-w-xl w-full mx-auto items-center">
-        <p className="text-xs uppercase tracking-widest text-stone-500">Round over</p>
-        <h2 className="text-3xl font-medium">{nameOf(winner)} wins</h2>
+      <div className="flex flex-col gap-6 max-w-4xl w-full mx-auto items-center animate-rise">
+        <p className="text-xs uppercase tracking-[0.2em] text-stone-500">Round over</p>
+        <h2 className="font-serif text-5xl">{nameOf(winner)} wins</h2>
         <p className="text-stone-600 text-center">
           {contributions.length} contribution{contributions.length === 1 ? "" : "s"} on the table.
         </p>
-        <Button onClick={finalize}>Continue</Button>
+        <Button onClick={finalize}>Next</Button>
       </div>
     );
   }

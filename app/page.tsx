@@ -43,14 +43,16 @@ export default function Home() {
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-6 py-16 max-w-xl mx-auto w-full">
-      <h1 className="text-5xl font-medium tracking-tight mb-3">Lichen</h1>
-      <p className="text-stone-600 text-base mb-12">
-        {couple.player_a_name} & {couple.player_b_name}
+      <h1 className="font-serif text-7xl tracking-tight mb-4">Lichen</h1>
+      <p className="text-stone-500 text-sm uppercase tracking-[0.3em] mb-16">
+        <span className="text-rose-600">{couple.player_a_name}</span>
+        <span className="mx-3 text-stone-400">&</span>
+        <span className="text-sky-700">{couple.player_b_name}</span>
       </p>
       <div className="flex flex-col gap-3 w-full max-w-xs">
-        <Button onClick={() => router.push("/session")}>Start a session</Button>
-        <Link href="/settings" className="text-center text-stone-600 hover:text-stone-900 text-sm py-2">
-          Settings &amp; memory
+        <Button onClick={() => router.push("/session")} className="text-lg py-4">Play</Button>
+        <Link href="/settings" className="text-center text-stone-500 hover:text-stone-800 text-sm py-3">
+          Memory &amp; settings
         </Link>
       </div>
     </div>

@@ -3,21 +3,25 @@
 import { useState } from "react";
 import { Button } from "./Button";
 import { useVoiceRecorder } from "@/hooks/useVoiceRecorder";
+import { themeFor, type PlayerSlot } from "@/lib/colors";
 
 export function AnswerInput({
   onSubmit,
-  submitLabel = "Submit",
-  placeholder = "Take your time…",
+  submitLabel = "Done",
+  placeholder = "",
   disabled = false,
+  player,
 }: {
   onSubmit: (text: string) => Promise<void> | void;
   submitLabel?: string;
   placeholder?: string;
   disabled?: boolean;
+  player?: PlayerSlot;
 }) {
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const recorder = useVoiceRecorder();
+  const theme = player ? themeFor(player) : null;
 
   const handleSubmit = async () => {
     if (!text.trim() || submitting) return;
@@ -40,15 +44,26 @@ export function AnswerInput({
     }
   };
 
+  // Player-colored focus ring via inline style so dynamic colors don't fight Tailwind JIT
+  const focusStyle = theme ? ({ "--tw-ring-color": theme.hex + "55" } as React.CSSProperties) : undefined;
+
   return (
     <div className="flex flex-col gap-3">
       <textarea
         value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder={placeholder}
-        rows={5}
+        rows={4}
+        autoFocus
         disabled={disabled || submitting || recorder.state === "transcribing"}
-        className="w-full rounded-2xl border border-stone-200 bg-white px-5 py-4 text-lg leading-relaxed focus:outline-none focus:ring-2 focus:ring-stone-900/10 resize-none"
+        style={focusStyle}
+        className={`w-full rounded-3xl border-2 ${theme ? "" : "border-stone-200"} bg-white px-8 py-6 text-2xl leading-relaxed focus:outline-none focus:ring-4 resize-none transition-colors`}
+        onFocus={(e) => {
+          if (theme) e.currentTarget.style.borderColor = theme.hex;
+        }}
+        onBlur={(e) => {
+          if (theme) e.currentTarget.style.borderColor = "";
+        }}
       />
       {recorder.error ? (
         <p className="text-sm text-rose-600">{recorder.error}</p>
@@ -76,7 +91,7 @@ export function AnswerInput({
           )}
         </button>
         <Button onClick={handleSubmit} disabled={!text.trim() || submitting || disabled}>
-          {submitting ? "Scoring…" : submitLabel}
+          {submitting ? "Reading…" : submitLabel}
         </Button>
       </div>
     </div>

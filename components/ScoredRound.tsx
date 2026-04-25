@@ -37,6 +37,7 @@ export function ScoredRound({
   const [roundId, setRoundId] = useState<string | null>(null);
 
   const answeringPlayer = round.answeringPlayer ?? "a";
+  const partnerPlayer = answeringPlayer === "a" ? "b" : "a";
   const answererName = answeringPlayer === "a" ? playerAName : playerBName;
   const partnerName = answeringPlayer === "a" ? playerBName : playerAName;
 
@@ -86,6 +87,7 @@ export function ScoredRound({
     return (
       <PassDevice
         toName={answererName}
+        toPlayer={answeringPlayer}
         subtitle={meta}
         onContinue={() => setPhase("answering")}
       />
@@ -94,42 +96,63 @@ export function ScoredRound({
 
   if (phase === "answering") {
     return (
-      <div className="flex flex-col gap-6 max-w-xl w-full mx-auto">
-        <PromptCard promptText={round.promptText} meta={meta} />
-        <AnswerInput onSubmit={handleAnswer} submitLabel="Submit" />
+      <div className="flex flex-col gap-6 max-w-4xl w-full mx-auto animate-rise">
+        <PromptCard promptText={round.promptText} meta={meta} player={answeringPlayer} playerName={answererName} />
+        <AnswerInput onSubmit={handleAnswer} submitLabel="Done" player={answeringPlayer} />
       </div>
     );
   }
 
   if (phase === "scoring" && score) {
     return (
-      <div className="flex flex-col gap-6 max-w-xl w-full mx-auto items-center">
-        <ScoreCard hearts={score.hearts} axes={score.axes_fired} reason={score.reason} />
-        <Button onClick={() => setPhase("tiebreaker")}>Pass to {partnerName}</Button>
+      <div className="flex flex-col gap-6 max-w-4xl w-full mx-auto items-center animate-rise">
+        <ScoreCard
+          hearts={score.hearts}
+          axes={score.axes_fired}
+          reason={score.reason}
+          player={answeringPlayer}
+        />
+        <Button
+          onClick={() => setPhase("tiebreaker")}
+          className="animate-fade-in"
+          style={{ animationDelay: "1900ms", animationFillMode: "both" } as React.CSSProperties}
+        >
+          Pass to {partnerName}
+        </Button>
       </div>
     );
   }
 
   if (phase === "tiebreaker") {
     return (
-      <div className="flex flex-col gap-6 max-w-xl w-full mx-auto">
-        <PromptCard promptText={round.promptText} meta={meta} />
-        <p className="text-stone-600 text-sm italic">{answererName} answered: shown after you tap</p>
-        <TiebreakerCard receivingPlayerName={partnerName} onSubmit={handleTiebreaker} />
+      <div className="flex flex-col gap-6 max-w-4xl w-full mx-auto animate-rise">
+        <PromptCard promptText={round.promptText} meta={meta} player={partnerPlayer} playerName={partnerName} />
+        <TiebreakerCard
+          receivingPlayerName={partnerName}
+          receivingPlayerSlot={partnerPlayer}
+          onSubmit={handleTiebreaker}
+        />
       </div>
     );
   }
 
   if (phase === "tiebreaker-result" && score) {
     return (
-      <div className="flex flex-col gap-6 max-w-xl w-full mx-auto items-center">
+      <div className="flex flex-col gap-6 max-w-4xl w-full mx-auto items-center animate-rise">
         <ScoreCard
           hearts={score.hearts}
           axes={score.axes_fired}
           reason={score.reason}
-          title="Final score"
+          title="Final"
+          player={answeringPlayer}
         />
-        <Button onClick={onComplete}>Continue</Button>
+        <Button
+          onClick={onComplete}
+          className="animate-fade-in"
+          style={{ animationDelay: "1900ms", animationFillMode: "both" } as React.CSSProperties}
+        >
+          Next
+        </Button>
       </div>
     );
   }

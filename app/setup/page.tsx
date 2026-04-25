@@ -35,25 +35,34 @@ export default function SetupPage() {
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-6 py-16 max-w-md mx-auto w-full">
-      <h1 className="text-4xl font-medium tracking-tight mb-2">Welcome</h1>
-      <p className="text-stone-600 text-base mb-10 text-center">
-        Lichen is for two people. Add your names to begin.
+      <h1 className="font-serif text-6xl tracking-tight mb-4">Lichen</h1>
+      <p className="text-stone-600 text-base mb-12 text-center font-serif text-lg italic">
+        Two names. To begin.
       </p>
       <div className="flex flex-col gap-4 w-full">
-        <input
-          value={a}
-          onChange={(e) => setA(e.target.value)}
-          placeholder="Your name"
-          className="w-full rounded-2xl border border-stone-200 bg-white px-5 py-4 text-lg focus:outline-none focus:ring-2 focus:ring-stone-900/10"
-        />
-        <input
-          value={b}
-          onChange={(e) => setB(e.target.value)}
-          placeholder="Their name"
-          className="w-full rounded-2xl border border-stone-200 bg-white px-5 py-4 text-lg focus:outline-none focus:ring-2 focus:ring-stone-900/10"
-        />
+        <div className="relative">
+          <span className="absolute -top-2 left-5 bg-stone-50 px-2 text-xs uppercase tracking-widest text-rose-600">
+            One of you
+          </span>
+          <input
+            value={a}
+            onChange={(e) => setA(e.target.value)}
+            autoFocus
+            className="w-full rounded-2xl border-2 border-rose-200 bg-white px-5 py-4 text-xl font-serif focus:outline-none focus:border-rose-400"
+          />
+        </div>
+        <div className="relative">
+          <span className="absolute -top-2 left-5 bg-stone-50 px-2 text-xs uppercase tracking-widest text-sky-700">
+            The other
+          </span>
+          <input
+            value={b}
+            onChange={(e) => setB(e.target.value)}
+            className="w-full rounded-2xl border-2 border-sky-200 bg-white px-5 py-4 text-xl font-serif focus:outline-none focus:border-sky-500"
+          />
+        </div>
         {error ? <p className="text-sm text-rose-600">{error}</p> : null}
-        <Button onClick={submit} disabled={!a.trim() || !b.trim() || submitting}>
+        <Button onClick={submit} disabled={!a.trim() || !b.trim() || submitting} className="mt-4 text-lg py-4">
           {submitting ? "…" : "Begin"}
         </Button>
       </div>

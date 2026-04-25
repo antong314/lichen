@@ -7,6 +7,8 @@ import { BuildOnRound } from "@/components/BuildOnRound";
 import { GuessRound } from "@/components/GuessRound";
 import { QuietRound } from "@/components/QuietRound";
 import { Button } from "@/components/Button";
+import { SessionProgress } from "@/components/SessionProgress";
+import type { PlayerSlot } from "@/lib/colors";
 import type { PlannedRound } from "@/lib/rounds";
 
 interface Couple {
@@ -75,7 +77,10 @@ export default function SessionPage() {
   }
 
   const round = data.plan[currentIdx];
-  const meta = `${ROUND_DISPLAY[round.type] ?? round.type} · Round ${currentIdx + 1} of ${data.plan.length}`;
+  const meta = ROUND_DISPLAY[round.type] ?? round.type;
+  const dotPlayers: Array<PlayerSlot | undefined> = data.plan.map(
+    (r) => r.answeringPlayer ?? r.predictingPlayer,
+  );
 
   const advance = async () => {
     if (currentIdx < data.plan.length - 1) {
@@ -95,15 +100,30 @@ export default function SessionPage() {
     meta,
   };
 
+  const quit = async () => {
+    if (!confirm("Quit this session? Progress so far is saved; the session will be marked ended.")) return;
+    await fetch(`/api/sessions/${data.session_id}/end`, { method: "POST" });
+    router.push("/");
+  };
+
   return (
-    <div className="flex-1 flex items-center justify-center px-4 py-8 w-full">
-      {(round.type === "admiration" || round.type === "generosity_of_frame" || round.type === "memory") && (
-        <ScoredRound key={currentIdx} {...common} />
-      )}
-      {round.type === "build_on" && <BuildOnRound key={currentIdx} {...common} />}
-      {round.type === "guess_the_answer" && <GuessRound key={currentIdx} {...common} />}
-      {round.type === "quiet" && <QuietRound key={currentIdx} {...common} />}
-    </div>
+    <>
+      <SessionProgress total={data.plan.length} current={currentIdx} players={dotPlayers} />
+      <button
+        onClick={quit}
+        className="fixed top-3 right-4 z-[60] text-stone-400 hover:text-stone-700 text-sm px-3 py-1.5 rounded-full bg-white/80 backdrop-blur border border-stone-200"
+      >
+        Quit
+      </button>
+      <div className="flex-1 flex items-center justify-center px-4 pt-16 pb-8 w-full">
+        {(round.type === "admiration" || round.type === "generosity_of_frame" || round.type === "memory") && (
+          <ScoredRound key={currentIdx} {...common} />
+        )}
+        {round.type === "build_on" && <BuildOnRound key={currentIdx} {...common} />}
+        {round.type === "guess_the_answer" && <GuessRound key={currentIdx} {...common} />}
+        {round.type === "quiet" && <QuietRound key={currentIdx} {...common} />}
+      </div>
+    </>
   );
 }
 

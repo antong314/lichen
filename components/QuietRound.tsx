@@ -72,6 +72,7 @@ export function QuietRound({
     return (
       <PassDevice
         toName={playerAName}
+        toPlayer="a"
         subtitle={meta ?? "Quiet round — pick a photo"}
         onContinue={() => setPhase("a-pick")}
       />
@@ -96,7 +97,7 @@ export function QuietRound({
 
   if (phase === "pass-to-b") {
     return (
-      <PassDevice toName={playerBName} subtitle="Your turn — pick a photo" onContinue={() => setPhase("b-pick")} />
+      <PassDevice toName={playerBName} toPlayer="b" subtitle="Your turn — pick a photo" onContinue={() => setPhase("b-pick")} />
     );
   }
 
@@ -186,7 +187,7 @@ function PhotoPicker({
   };
 
   return (
-    <div className="flex flex-col gap-5 max-w-xl w-full mx-auto">
+    <div className="flex flex-col gap-5 max-w-4xl w-full mx-auto">
       <div className="bg-white rounded-2xl border border-stone-200 px-6 py-5">
         <p className="text-xs uppercase tracking-widest text-stone-500 mb-2">Quiet round</p>
         <p className="text-base text-stone-800">{prompt}</p>

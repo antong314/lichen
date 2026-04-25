@@ -1,22 +1,59 @@
-import { Button } from "./Button";
+"use client";
+
+import { useEffect, useState } from "react";
+import { themeFor, type PlayerSlot } from "@/lib/colors";
 
 export function PassDevice({
   toName,
+  toPlayer,
   subtitle,
   onContinue,
 }: {
   toName: string;
+  toPlayer: PlayerSlot;
   subtitle?: string;
   onContinue: () => void;
 }) {
+  const theme = themeFor(toPlayer);
+  const [armed, setArmed] = useState(false);
+
+  // Don't trigger onContinue until the slide-up has settled.
+  useEffect(() => {
+    const t = setTimeout(() => setArmed(true), 500);
+    return () => clearTimeout(t);
+  }, []);
+
   return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center bg-stone-900 text-stone-50 z-50">
-      <p className="text-stone-400 text-sm uppercase tracking-widest mb-4">Pass to</p>
-      <h2 className="text-5xl font-medium mb-2">{toName}</h2>
-      {subtitle ? <p className="text-stone-400 text-base mb-12 mt-2">{subtitle}</p> : null}
-      <Button variant="secondary" onClick={onContinue} className="mt-8">
-        Tap when ready
-      </Button>
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={armed ? onContinue : undefined}
+      onKeyDown={(e) => armed && e.key === "Enter" && onContinue()}
+      className={`fixed inset-0 z-50 flex flex-col items-center justify-center cursor-pointer text-white animate-sweep-up ${theme.bg}`}
+    >
+      <p className="opacity-70 text-xs uppercase tracking-[0.3em] mb-6 animate-fade-in">
+        Pass to
+      </p>
+      <h2
+        className="font-serif text-7xl tracking-tight animate-rise"
+        style={{ animationDelay: "200ms", animationFillMode: "both" }}
+      >
+        {toName}
+      </h2>
+      {subtitle ? (
+        <p
+          className="opacity-80 text-base mt-4 animate-fade-in"
+          style={{ animationDelay: "400ms", animationFillMode: "both" }}
+        >
+          {subtitle}
+        </p>
+      ) : null}
+      <p
+        className="absolute bottom-12 opacity-50 text-xs uppercase tracking-widest animate-fade-in"
+        style={{ animationDelay: "700ms", animationFillMode: "both" }}
+      >
+        Tap anywhere
+      </p>
     </div>
   );
 }

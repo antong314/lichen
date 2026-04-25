@@ -107,11 +107,15 @@ export function GuessRound({
     setPhase(hearts === 1 ? "exit-ramp" : "reason-shown");
   };
 
+  const partnerTheme = partnerPlayer;
+  const predictorTheme = predictingPlayer;
+
   if (phase === "pass-to-predictor") {
     return (
       <PassDevice
         toName={predictorName}
-        subtitle={meta ?? `Predict what ${partnerName} would say`}
+        toPlayer={predictorTheme}
+        subtitle={`Guess what ${partnerName} would say`}
         onContinue={() => setPhase("predicting")}
       />
     );
@@ -119,25 +123,30 @@ export function GuessRound({
 
   if (phase === "predicting") {
     return (
-      <div className="flex flex-col gap-6 max-w-xl w-full mx-auto">
-        <PromptCard promptText={round.promptText} meta={meta ?? "Guess"} />
-        <p className="text-stone-600 text-sm">
-          {predictorName}, predict what {partnerName} would actually say.
-        </p>
-        <AnswerInput onSubmit={submitPrediction} submitLabel="Submit prediction" />
+      <div className="flex flex-col gap-6 max-w-4xl w-full mx-auto animate-rise">
+        <PromptCard promptText={round.promptText} meta={meta ?? "Guess"} player={predictorTheme} playerName={predictorName} />
+        <AnswerInput onSubmit={submitPrediction} submitLabel="That's my guess" player={predictorTheme} />
       </div>
     );
   }
 
   if (phase === "attention-shown" && attention) {
     return (
-      <div className="flex flex-col gap-6 max-w-xl w-full mx-auto items-center">
-        <p className="text-xs uppercase tracking-widest text-stone-500">Attention score</p>
-        <ScoreCard hearts={attention.hearts} axes={attention.axes_fired} reason={attention.reason} />
-        <p className="text-sm text-stone-600 text-center max-w-md">
-          Accuracy comes next — pass to {partnerName} for their real answer.
-        </p>
-        <Button onClick={() => setPhase("pass-to-real")}>Pass to {partnerName}</Button>
+      <div className="flex flex-col gap-6 max-w-4xl w-full mx-auto items-center animate-rise">
+        <p className="text-xs uppercase tracking-[0.2em] text-stone-500">Attention</p>
+        <ScoreCard
+          hearts={attention.hearts}
+          axes={attention.axes_fired}
+          reason={attention.reason}
+          player={predictorTheme}
+        />
+        <Button
+          onClick={() => setPhase("pass-to-real")}
+          className="animate-fade-in"
+          style={{ animationDelay: "1900ms", animationFillMode: "both" } as React.CSSProperties}
+        >
+          Pass to {partnerName}
+        </Button>
       </div>
     );
   }
@@ -146,7 +155,8 @@ export function GuessRound({
     return (
       <PassDevice
         toName={partnerName}
-        subtitle="Answer the prompt yourself"
+        toPlayer={partnerTheme}
+        subtitle="Your real answer"
         onContinue={() => setPhase("real-answering")}
       />
     );
@@ -154,35 +164,34 @@ export function GuessRound({
 
   if (phase === "real-answering") {
     return (
-      <div className="flex flex-col gap-6 max-w-xl w-full mx-auto">
-        <PromptCard promptText={round.promptText} meta={meta ?? "Guess — your real answer"} />
-        <p className="text-stone-600 text-sm">{partnerName}, what's your real answer?</p>
-        <AnswerInput onSubmit={submitRealAnswer} submitLabel="Submit" />
+      <div className="flex flex-col gap-6 max-w-4xl w-full mx-auto animate-rise">
+        <PromptCard promptText={round.promptText} meta={meta ?? "Your real answer"} player={partnerTheme} playerName={partnerName} />
+        <AnswerInput onSubmit={submitRealAnswer} submitLabel="Done" player={partnerTheme} />
       </div>
     );
   }
 
   if (phase === "accuracy-tap") {
     return (
-      <div className="flex flex-col gap-6 max-w-xl w-full mx-auto">
-        <div className="bg-white rounded-2xl border border-stone-200 px-5 py-4">
-          <p className="text-xs uppercase tracking-widest text-stone-500 mb-2">{predictorName}'s prediction</p>
-          <p className="text-stone-800">{predictionText}</p>
+      <div className="flex flex-col gap-7 max-w-4xl w-full mx-auto animate-rise">
+        <div className="bg-white rounded-3xl border border-stone-200 px-8 py-6">
+          <p className="text-sm uppercase tracking-[0.25em] text-stone-500 mb-3">{predictorName} guessed</p>
+          <p className="font-serif text-3xl text-stone-800 leading-snug">{predictionText}</p>
         </div>
-        <div className="bg-white rounded-2xl border border-stone-200 px-5 py-4">
-          <p className="text-xs uppercase tracking-widest text-stone-500 mb-2">{partnerName}'s real answer</p>
-          <p className="text-stone-800">{realAnswer}</p>
+        <div className="bg-white rounded-3xl border border-stone-200 px-8 py-6">
+          <p className="text-sm uppercase tracking-[0.25em] text-stone-500 mb-3">{partnerName} actually said</p>
+          <p className="font-serif text-3xl text-stone-800 leading-snug">{realAnswer}</p>
         </div>
-        <p className="text-stone-700 text-base">{partnerName}, how close did they get?</p>
-        <div className="grid grid-cols-3 gap-3">
+        <p className="text-stone-700 text-xl mt-2">{partnerName} — how close?</p>
+        <div className="grid grid-cols-3 gap-4">
           {[1, 2, 3].map((n) => (
             <button
               key={n}
               onClick={() => submitAccuracy(n as 1 | 2 | 3)}
-              className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-white border border-stone-200 hover:bg-stone-100 transition-colors"
+              className="flex flex-col items-center gap-3 p-6 rounded-2xl bg-white border border-stone-200 hover:bg-stone-100 transition-colors"
             >
-              <Hearts count={n} size="md" />
-              <span className="text-xs text-stone-500">
+              <Hearts count={n} size="lg" />
+              <span className="text-sm text-stone-500 uppercase tracking-wider">
                 {n === 1 ? "Way off" : n === 2 ? "Partway" : "Spot on"}
               </span>
             </button>
@@ -194,21 +203,27 @@ export function GuessRound({
 
   if (phase === "reason-shown" && accuracyHearts) {
     return (
-      <div className="flex flex-col gap-6 max-w-xl w-full mx-auto items-center">
-        <p className="text-xs uppercase tracking-widest text-stone-500">Accuracy</p>
-        <Hearts count={accuracyHearts} size="lg" />
-        <p className="text-stone-700 text-base leading-relaxed text-center max-w-md">{accuracyReason}</p>
-        <Button onClick={onComplete}>Continue</Button>
+      <div className="flex flex-col gap-6 max-w-4xl w-full mx-auto items-center animate-rise">
+        <p className="text-xs uppercase tracking-[0.2em] text-stone-500">Accuracy</p>
+        <Hearts count={accuracyHearts} size="lg" animate colorClass="text-rose-500" />
+        <p className="font-serif text-2xl text-stone-800 leading-relaxed text-center max-w-2xl animate-fade-in" style={{ animationDelay: "1500ms", animationFillMode: "both" }}>
+          {accuracyReason}
+        </p>
+        <Button onClick={onComplete} className="animate-fade-in" style={{ animationDelay: "1900ms", animationFillMode: "both" } as React.CSSProperties}>
+          Next
+        </Button>
       </div>
     );
   }
 
   if (phase === "exit-ramp") {
     return (
-      <div className="flex flex-col gap-6 max-w-xl w-full mx-auto items-center">
-        <p className="text-stone-700 text-base leading-relaxed text-center max-w-md">{accuracyReason}</p>
+      <div className="flex flex-col gap-6 max-w-4xl w-full mx-auto items-center animate-rise">
+        <p className="font-serif text-2xl text-stone-800 leading-relaxed text-center max-w-2xl">
+          {accuracyReason}
+        </p>
         <Button onClick={onComplete} variant="secondary">
-          Tap when ready
+          When ready
         </Button>
       </div>
     );
